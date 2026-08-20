@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1 # API version for ArgoCD Projects
+kind: AppProject               # Kind is always AppProject for Projects
+metadata:
+  name: fitness-app-project          # Name of the Project (unique within ArgoCD)
+  namespace: argocd            # Must always be created in ArgoCD's namespace
+spec:
+  description: Project for fitness-app   # Optional description
+  sourceRepos:                 # Which Git repos are allowed for this Project
+    - https://github.com/jayantmule03/Fitness-app.git
+  destinations:                # Which clusters/namespaces apps in this Project can target
+    - namespace: fitness
+      server: https://kubernetes.default.svc  # Target cluster server url
+  clusterResourceWhitelist:    # Which cluster-wide resources are allowed (e.g., CRDs)
+    - group: "*"               # '*' means allow all groups
+      kind: "*"                # '*' means allow all kinds
+  namespaceResourceWhitelist:  # Which namespace-level resources are allowed
+    - group: "*"               # Here also allowing everything
+      kind: "*"
+  roles:                       # Define roles for RBAC within this Project
+    - name: fitness-app-project-admins    # Role name
+      description: Admins for fitness-app-project team
+      policies:                # Policies associated with this role
+        # syntax: - p, proj:<project-name>:<role-name>, applications, <action>, <project>/<app-name>, permission(allow|deny)
+        - p, proj:fitness-app-project:fitness-app-project-admins, applications, *, fitness-app-project/*, allow
